@@ -67,9 +67,8 @@ public class UserProfileController {
     // Actualizar perfil
     @PutMapping("/{id}")
     public ResponseEntity<UserProfile> updateUserProfile(@PathVariable int id, @Valid @RequestBody UserProfile userProfile) {
-        return userProfileService.updateUserProfile(id, userProfile)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        UserProfile updated = userProfileService.updateUserProfile(id, userProfile);
+        return ResponseEntity.ok(updated);
     }
 
     // Eliminar perfil

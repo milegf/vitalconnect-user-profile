@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 //</editor-fold>
 
 @Service
@@ -64,23 +63,30 @@ public class UserProfileService {
     @Transactional
     public List<String> obtenerEspecialidades(Integer id) {
         UserProfile user = userProfileRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuarios no encontrados."));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario con ID " + id + " no encontrado."));
 
         return new ArrayList<>(user.getEspecialidades());
     }
 
     // Actualizar perfil
-    public Optional<UserProfile> updateUserProfile(int id, UserProfile updatedProfile) {
-        return userProfileRepository.findById(id).map(existing -> {
-            existing.setNombre(updatedProfile.getNombre());
-            existing.setApellido(updatedProfile.getApellido());
-            // Atributo de RUT saltado, no se permite actualizarlo.
-            existing.setCorreo(updatedProfile.getCorreo());
-            existing.setContrasena(updatedProfile.getContrasena());
-            existing.setEspecialidades(updatedProfile.getEspecialidades());
-            existing.setRol(updatedProfile.getRol());
-            return userProfileRepository.save(existing);
-        });
+    public UserProfile updateUserProfile(int id, UserProfile updatedProfile) {
+        UserProfile existing = userProfileRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario con ID " + id + " no encontrado."));
+
+        // Validación de rol
+        if ("PACIENTE".equalsIgnoreCase(updatedProfile.getRol())) {
+            if (updatedProfile.getEspecialidades() != null && !updatedProfile.getEspecialidades().isEmpty()) {
+                throw new IllegalArgumentException("Un paciente no puede tener especialidades.");
+            }
+        }
+
+        existing.setNombre(updatedProfile.getNombre());
+        existing.setApellido(updatedProfile.getApellido());
+        existing.setCorreo(updatedProfile.getCorreo());
+        existing.setEspecialidades(updatedProfile.getEspecialidades());
+        existing.setRol(updatedProfile.getRol());
+
+        return userProfileRepository.save(existing);
     }
 
     // Eliminar perfil
