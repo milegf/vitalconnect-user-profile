@@ -76,6 +76,7 @@ public class UserProfileService {
             existing.setApellido(updatedProfile.getApellido());
             // Atributo de RUT saltado, no se permite actualizarlo.
             existing.setCorreo(updatedProfile.getCorreo());
+            existing.setContrasena(updatedProfile.getContrasena());
             existing.setEspecialidades(updatedProfile.getEspecialidades());
             existing.setRol(updatedProfile.getRol());
             return userProfileRepository.save(existing);

@@ -49,6 +49,10 @@ public class UserProfile {
     @Column(unique = true)
     private String correo;
 
+    @NotBlank(message = "Es obligatorio registrar una contraseña.")
+    @Size(min = 12, message = "La contraseña debe tener al menos 12 caracteres.")
+    private String contrasena; // Para otras entregas se puede trabajar en el cifrado y seguridad.
+
     @Column(name = "rol")
     @Size(max = 70, message = "El rol no puede exceder los 70 caracteres.")
     private String rol;
