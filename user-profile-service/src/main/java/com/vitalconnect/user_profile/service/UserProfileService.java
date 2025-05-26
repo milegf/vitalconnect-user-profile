@@ -27,6 +27,11 @@ public class UserProfileService {
 
     // Crear nuevo perfil
     public UserProfile createUserProfile(UserProfile userProfile) {
+        if ("PACIENTE".equalsIgnoreCase(userProfile.getRol())) {
+            if (userProfile.getEspecialidades() != null && !userProfile.getEspecialidades().isEmpty()) {
+                throw new IllegalArgumentException("Un paciente no puede tener especialidades.");
+            }
+        }
         return userProfileRepository.save(userProfile);
     }
 
@@ -42,15 +47,25 @@ public class UserProfileService {
     }
 
     // Obtener perfil por RUT
-    public Optional<UserProfile> getUserProfileByRut(String rut) {
-        return userProfileRepository.findByRut(rut);
+    public UserProfile getUserProfileByRut(String rut) {
+        return userProfileRepository.findByRut(rut)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario con RUT " + rut + " no encontrado."));
+    }
+
+    // Obtener usuarios activos
+    public List<UserProfile> obtenerUsuariosActivos() {
+        List<UserProfile> usuariosActivos = userProfileRepository.findByActivoTrue();
+        if (usuariosActivos.isEmpty()) {
+            throw new ResourceNotFoundException("No hay usuarios activos registrados.");
+        }
+        return usuariosActivos;
     }
 
     // Obtener por especialidad
     @Transactional
     public List<String> obtenerEspecialidades(Integer id) {
         UserProfile user = userProfileRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Usuarios no encontrados."));
 
         return new ArrayList<>(user.getEspecialidades());
     }
@@ -63,18 +78,16 @@ public class UserProfileService {
             // Atributo de RUT saltado, no se permite actualizarlo.
             existing.setEmail(updatedProfile.getEmail());
             existing.setEspecialidades(updatedProfile.getEspecialidades());
-            existing.setRoles(updatedProfile.getRoles());
+            existing.setRol(updatedProfile.getRol());
             return userProfileRepository.save(existing);
         });
     }
 
     // Eliminar perfil
-    public boolean deleteUserProfile(int id) {
-        if (userProfileRepository.existsById(id)) {
-            userProfileRepository.deleteById(id);
-            return true;
+    public void deleteUserProfile(int id) {
+        if (!userProfileRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Usuario con ID " + id + " no encontrado.");
         }
-        return false;
+        userProfileRepository.deleteById(id);
     }
-
 }
