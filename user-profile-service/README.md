@@ -6,7 +6,6 @@ El user-profile-service es responsable de la administración de los perfiles de 
 ## Funcionalidad
 - Gestión de datos de usuario (nombre, rut, especialidad, etc.).
 - Definición de roles (paciente, médico, profesional de la salud).
-- Almacenamiento seguro de información.
 - Exposición de endpoints RESTful.
 - Base de datos relacional (MySQL).
 
