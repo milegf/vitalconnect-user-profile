@@ -1,6 +1,5 @@
 package com.vitalconnect.user_profile.repository;
 
-
 //<editor-fold desc="IMPORTS">
 import com.vitalconnect.user_profile.model.UserProfile;
 import org.springframework.data.jpa.repository.JpaRepository;
