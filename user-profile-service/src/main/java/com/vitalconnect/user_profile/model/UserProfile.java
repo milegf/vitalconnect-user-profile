@@ -10,14 +10,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.util.List;
-import java.util.Set;
 // </editor-fold>
 
 // Anotaciones JPA para la creación de tabla.
@@ -50,7 +47,7 @@ public class UserProfile {
     @NotBlank(message = "Es obligatorio registrar un correo.")
     @Size(max = 255, message = "El correo no puede exceder los 255 caracteres.")
     @Column(unique = true)
-    private String email;
+    private String correo;
 
     @Column(name = "rol")
     @Size(max = 70, message = "El rol no puede exceder los 70 caracteres.")

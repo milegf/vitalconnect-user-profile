@@ -2,13 +2,12 @@ package com.vitalconnect.user_profile.service;
 
 //<editor-fold desc="IMPORTS">
 import com.vitalconnect.user_profile.exception.ResourceNotFoundException;
-
 import com.vitalconnect.user_profile.model.UserProfile;
 import com.vitalconnect.user_profile.repository.UserProfileRepository;
+
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -76,7 +75,7 @@ public class UserProfileService {
             existing.setNombre(updatedProfile.getNombre());
             existing.setApellido(updatedProfile.getApellido());
             // Atributo de RUT saltado, no se permite actualizarlo.
-            existing.setEmail(updatedProfile.getEmail());
+            existing.setCorreo(updatedProfile.getCorreo());
             existing.setEspecialidades(updatedProfile.getEspecialidades());
             existing.setRol(updatedProfile.getRol());
             return userProfileRepository.save(existing);

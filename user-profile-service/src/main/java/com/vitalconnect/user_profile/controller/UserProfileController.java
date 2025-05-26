@@ -38,14 +38,14 @@ public class UserProfileController {
     }
 
     // Obtener perfil por ID
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}")
     public ResponseEntity<UserProfile> getUserProfileById(@PathVariable int id) {
         UserProfile userProfile = userProfileService.getUserProfileById(id);
         return ResponseEntity.ok(userProfile);
     }
 
     // Obtener perfil por RUT
-    @GetMapping("/{rut}")
+    @GetMapping("/rut/{rut}")
     public ResponseEntity<UserProfile> getUserProfileByRut(@PathVariable String rut) {
         UserProfile userProfile = userProfileService.getUserProfileByRut(rut);
         return ResponseEntity.ok(userProfile);
