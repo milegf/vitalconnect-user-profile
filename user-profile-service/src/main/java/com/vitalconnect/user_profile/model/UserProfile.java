@@ -48,14 +48,13 @@ public class UserProfile {
     private String rut;
 
     @NotBlank(message = "Es obligatorio registrar un correo.")
-    @Size(max = 255, message = "El mail no puede exceder los 255 caracteres.")
+    @Size(max = 255, message = "El correo no puede exceder los 255 caracteres.")
     @Column(unique = true)
     private String email;
 
-    @ElementCollection(fetch = FetchType.EAGER) //Permite la carga anticipada de datos
-    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "rol")
-    private List<String> roles;
+    @Size(max = 70, message = "El rol no puede exceder los 70 caracteres.")
+    private String rol;
 
     @ElementCollection
     @CollectionTable(name = "user_specialties", joinColumns = @JoinColumn(name = "user_id"))

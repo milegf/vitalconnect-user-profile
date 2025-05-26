@@ -44,6 +44,20 @@ public class UserProfileController {
         return ResponseEntity.ok(userProfile);
     }
 
+    // Obtener perfil por RUT
+    @GetMapping("/{rut}")
+    public ResponseEntity<UserProfile> getUserProfileByRut(@PathVariable String rut) {
+        UserProfile userProfile = userProfileService.getUserProfileByRut(rut);
+        return ResponseEntity.ok(userProfile);
+    }
+
+    // Obtener usuarios activos
+    @GetMapping("/active")
+    public ResponseEntity<List<UserProfile>> obtenerUsuariosActivos() {
+        List<UserProfile> usuarios = userProfileService.obtenerUsuariosActivos();
+        return ResponseEntity.ok(usuarios);
+    }
+
     // Obtener especialidades de un usuario
     @GetMapping("/{id}/especialidades")
     public ResponseEntity<List<String>> getEspecialidades(@PathVariable int id) {
@@ -60,7 +74,7 @@ public class UserProfileController {
 
     // Eliminar perfil
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUserProfile(@PathVariable int id) {
+    public ResponseEntity<Void> deleteById(@PathVariable int id) {
         userProfileService.deleteUserProfile(id);
         return ResponseEntity.noContent().build();
     }
