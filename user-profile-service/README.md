@@ -73,13 +73,13 @@ user-profile-service
 
 ## Formato de los datos en JSON
 {
-"nombre": "Ana",
-"apellido": "Pérez",
-"rut": "12345678-9",
-"email": "ana.perez@mail.com",
-"rol": "MEDICO",
-"especialidades": ["Cardiología"],
-"activo": true
+"nombre": String,
+"apellido": String,
+"rut": String,
+"email": String,
+"rol": String,
+"especialidades": [String],
+"activo": Boolean
 }
 
 *Si el rol es "PACIENTE", no se requieren especialidades.*
