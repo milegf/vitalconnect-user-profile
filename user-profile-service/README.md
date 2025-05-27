@@ -82,7 +82,8 @@ user-profile-service
 "activo": Boolean
 }
 
-*Si el rol es "PACIENTE", no se requieren especialidades.*
+- *ID se ingresa de forma automática en la base de datos.*
+- *Si el rol es "PACIENTE", no se requieren especialidades.*
 
 ---
 ## Autoría
