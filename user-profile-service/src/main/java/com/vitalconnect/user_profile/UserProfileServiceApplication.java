@@ -8,6 +8,6 @@ public class UserProfileServiceApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(UserProfileServiceApplication.class, args);
-	}
 
+	}
 }
