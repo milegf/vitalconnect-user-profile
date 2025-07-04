@@ -8,10 +8,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.Random;
+import java.util.*;
 
 @Profile("dev")
 @Component
@@ -20,12 +17,11 @@ public class DataLoader implements CommandLineRunner {
     @Autowired
     private  UserProfileRepository repository;
 
-    List<String> roles = List.of("paciente", "doctor/a", "enfermera/o");
-    List<String> especialidades = List.of(
+    List<String> roles = new ArrayList<>(List.of("paciente", "doctor/a", "enfermera/o"));
+    List<String> especialidades = new ArrayList<>(List.of(
             "Cardiología", "Dermatología", "Pediatría", "Neurología", "Ginecología",
             "Traumatología", "Psiquiatría", "Otorrinolaringología", "Reumatología", "Oncología"
-    );
-
+    ));
 
     @Override
     public void run(String... args) throws Exception {

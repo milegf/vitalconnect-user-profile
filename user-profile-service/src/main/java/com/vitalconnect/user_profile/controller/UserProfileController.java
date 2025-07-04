@@ -17,6 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.vitalconnect.user_profile.assembler.UserProfileModelAssembler;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import java.util.List;
 //</editor-fold>
@@ -29,6 +34,9 @@ public class UserProfileController {
     @Autowired
     private UserProfileService userProfileService;
 
+    @Autowired
+    private UserProfileModelAssembler assembler;
+
     // SOLICITUDES HTTP
 
     // CREAR PERFIL
@@ -40,35 +48,40 @@ public class UserProfileController {
             @ApiResponse(responseCode = "500", description = "Error interno del servidor al crear el perfil.")
     })
     @PostMapping
-    public ResponseEntity<UserProfile> createUserProfile(
-        @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                description = "Datos del perfil de usuario a crear",
-                required = true,
-                content = @Content(schema = @Schema(implementation = UserProfile.class),
-                examples = @ExampleObject(
-                        name = "Ejemplo de creación de perfil",
-                        summary = "Nuevo usuario tipo paciente.",
-                        value = """
-                                {
-                                    "nombre": "Tomás",
-                                    "apellido": "Reyes",
-                                    "rut": "22.333.444-5",
-                                    "correo": "tcastro@email.com",
-                                    "contraseña": "ClaveSegura456",
-                                    "rol": "PACIENTE",
-                                    "especialidades": [],
-                                    "activo": true
-                                }
-                                """
-                        )
-                )
-        )
-        @Valid @RequestBody UserProfile userProfile
-    ){
+    public ResponseEntity<EntityModel<UserProfile>> createUserProfile(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Datos del perfil de usuario a crear",
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = UserProfile.class),
+                            examples = @ExampleObject(
+                                    name = "Ejemplo de creación de perfil",
+                                    summary = "Nuevo usuario tipo paciente.",
+                                    value = """
+                        {
+                            "nombre": "Tomás",
+                            "apellido": "Reyes",
+                            "rut": "22.333.444-5",
+                            "correo": "tcastro@email.com",
+                            "contraseña": "ClaveSegura456",
+                            "rol": "PACIENTE",
+                            "especialidades": [],
+                            "activo": true
+                        }
+                        """
+                            )
+                    )
+            )
+            @Valid @RequestBody UserProfile userProfile
+    ) {
+        UserProfile createdProfile = userProfileService.createUserProfile(userProfile);
+        EntityModel<UserProfile> entityModel = assembler.toModel(createdProfile);
+
         return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(userProfileService.createUserProfile(userProfile));
+                .created(linkTo(methodOn(UserProfileController.class).getUserProfileById(createdProfile.getId())).toUri())
+                .body(entityModel);
     }
+
+
 
     // OBTENER TODOS LOS PERFILES
     @Operation(summary = "Listar todos los perfiles de usuario",
@@ -78,11 +91,22 @@ public class UserProfileController {
             @ApiResponse(responseCode = "500", description = "Error interno del servidor al recuperar los perfiles.")
     })
     @GetMapping
-    public ResponseEntity<List<UserProfile>> getAllUserProfiles() {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(userProfileService.getAllUserProfiles());
+    public ResponseEntity<CollectionModel<EntityModel<UserProfile>>> getAllUserProfiles() {
+        List<UserProfile> profiles = userProfileService.getAllUserProfiles();
+
+        List<EntityModel<UserProfile>> profileModels = profiles.stream()
+                .map(assembler::toModel)
+                .toList();
+
+        CollectionModel<EntityModel<UserProfile>> collectionModel = CollectionModel.of(
+                profileModels,
+                linkTo(methodOn(UserProfileController.class).getAllUserProfiles()).withSelfRel()
+        );
+
+        return ResponseEntity.ok(collectionModel);
     }
+
+
 
     // OBTENER PERFIL POR ID
     @Operation(summary = "Obtener perfil de usuario por ID",
@@ -93,13 +117,17 @@ public class UserProfileController {
             @ApiResponse(responseCode = "500", description = "Error interno del servidor al recuperar el perfil.")
     })
     @GetMapping("/id/{id}")
-    public ResponseEntity<UserProfile> getUserProfileById(
+    public ResponseEntity<EntityModel<UserProfile>> getUserProfileById(
             @Parameter(name = "ID", description = "ID único del usuario que se desea consultar", required = true)
             @PathVariable int id
     ) {
         UserProfile userProfile = userProfileService.getUserProfileById(id);
-        return ResponseEntity.ok(userProfile);
+        EntityModel<UserProfile> entityModel = assembler.toModel(userProfile);
+        return ResponseEntity.ok(entityModel);
     }
+
+
+
 
     // OBTENER PERFIL POR RUT
     @Operation(summary = "Obtener perfil de usuario por RUT",
@@ -110,13 +138,16 @@ public class UserProfileController {
             @ApiResponse(responseCode = "500", description = "Error interno del servidor al recuperar el perfil.")
     })
     @GetMapping("/rut/{rut}")
-    public ResponseEntity<UserProfile> getUserProfileByRut(
+    public ResponseEntity<EntityModel<UserProfile>> getUserProfileByRut(
             @Parameter(name = "RUT", description = "RUT del usuario a consultar. Debe tener el siguiente formato: 12.345.678-9", required = true)
             @PathVariable String rut
     ) {
         UserProfile userProfile = userProfileService.getUserProfileByRut(rut);
-        return ResponseEntity.ok(userProfile);
+        EntityModel<UserProfile> entityModel = assembler.toModel(userProfile);
+        return ResponseEntity.ok(entityModel);
     }
+
+
 
     // OBTENER USUARIOS ACTIVOS
     @Operation(summary = "Obtener usuarios activos",
@@ -126,10 +157,23 @@ public class UserProfileController {
             @ApiResponse(responseCode = "500", description = "Error interno del servidor al recuperar los usuarios activos.")
     })
     @GetMapping("/active")
-    public ResponseEntity<List<UserProfile>> obtenerUsuariosActivos() {
+    public ResponseEntity<CollectionModel<EntityModel<UserProfile>>> obtenerUsuariosActivos() {
         List<UserProfile> usuarios = userProfileService.obtenerUsuariosActivos();
-        return ResponseEntity.ok(usuarios);
+
+        List<EntityModel<UserProfile>> usuarioModels = usuarios.stream()
+                .map(assembler::toModel)
+                .toList();
+
+        CollectionModel<EntityModel<UserProfile>> collectionModel = CollectionModel.of(
+                usuarioModels,
+                linkTo(methodOn(UserProfileController.class).obtenerUsuariosActivos()).withSelfRel()
+        );
+
+        return ResponseEntity.ok(collectionModel);
     }
+
+
+
 
     // Obtener especialidades de un usuario
     @Operation(summary = "Obtener especialidades de un usuario",
@@ -140,12 +184,24 @@ public class UserProfileController {
             @ApiResponse(responseCode = "500", description = "Error interno del servidor al recuperar las especialidades.")
     })
     @GetMapping("/{id}/especialidades")
-    public ResponseEntity<List<String>> getEspecialidades(
+    public ResponseEntity<CollectionModel<String>> getEspecialidades(
             @Parameter(name = "ID", description = "ID del usuario del cual se desea obtener la/s especialidad/es", required = true)
             @PathVariable int id
     ) {
-        return ResponseEntity.ok(userProfileService.obtenerEspecialidades(id));
+        List<String> especialidades = userProfileService.obtenerEspecialidades(id);
+
+        CollectionModel<String> collectionModel = CollectionModel.of(
+                especialidades,
+                linkTo(methodOn(UserProfileController.class).getEspecialidades(id)).withSelfRel(),
+                linkTo(methodOn(UserProfileController.class).getUserProfileById(id)).withRel("usuario"),
+                linkTo(methodOn(UserProfileController.class).getAllUserProfiles()).withRel("todos")
+        );
+
+        return ResponseEntity.ok(collectionModel);
     }
+
+
+
 
     // ACTUALIZAR PERFIL
     @Operation(summary = "Actualizar perfil de usuario",
@@ -157,37 +213,40 @@ public class UserProfileController {
             @ApiResponse(responseCode = "500", description = "Error interno del servidor al actualizar el perfil.")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<UserProfile> updateUserProfile(
+    public ResponseEntity<EntityModel<UserProfile>> updateUserProfile(
             @Parameter(name = "ID", description = "ID del usuario cuyo perfil se desea actualizar", required = true)
             @PathVariable int id,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Se deben incluir todos los campos del perfil del usuario con el o los datos actualizados.",
                     required = true,
                     content = @Content(
-                                schema = @Schema(implementation = UserProfile.class),
-                                examples = @ExampleObject(
-                                        name = "Ejemplo de actualización de perfil",
-                                        summary = "Actualizar un perfil de usuario con nuevos datos. En este caso, agregar una segunda especialidad a una doctora.",
-                                        value = """
-                                            {
-                                                "nombre": "Marta",
-                                                "apellido": "Castro",
-                                                "rut": "11.222.333-4",
-                                                "correo": "marta.castro@hospital.cl",
-                                                "contraseña": "ContraseñaSegura!123",
-                                                "rol": "DOCTOR/A",
-                                                "especialidades": ["Cardiología", "Pediatría"],
-                                                "activo": true
-                                            }
-                                            """
-                                        )
-                                )
+                            schema = @Schema(implementation = UserProfile.class),
+                            examples = @ExampleObject(
+                                    name = "Ejemplo de actualización de perfil",
+                                    summary = "Actualizar un perfil de usuario con nuevos datos. En este caso, agregar una segunda especialidad a una doctora.",
+                                    value = """
+                                    {
+                                        "nombre": "Marta",
+                                        "apellido": "Castro",
+                                        "rut": "11.222.333-4",
+                                        "correo": "marta.castro@hospital.cl",
+                                        "contraseña": "ContraseñaSegura!123",
+                                        "rol": "DOCTOR/A",
+                                        "especialidades": ["Cardiología", "Pediatría"],
+                                        "activo": true
+                                    }
+                                    """
+                            )
+                    )
             )
             @Valid @RequestBody UserProfile userProfile
     ) {
         UserProfile updated = userProfileService.updateUserProfile(id, userProfile);
-        return ResponseEntity.ok(updated);
+        EntityModel<UserProfile> entityModel = assembler.toModel(updated);
+        return ResponseEntity.ok(entityModel);
     }
+
+
 
     // ELIMINAR PERFIL
     @Operation(summary = "Eliminar perfil de usuario",

@@ -82,7 +82,6 @@ public class UserProfile {
             example = "[\"Cardiología\", \"Pediatría\"]")
     private List<String> especialidades;
 
-    @NotBlank(message = "Es obligatorio registrar si es un usuario que está activo en el sistema.")
     @Column(name = "activo")
     @Schema(description = "Indica si es un perfil activo",
             example = "true")
